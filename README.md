@@ -2,9 +2,9 @@ An all in one API manager, element and form builder.
 
 The following must be passed to the form builder call function:
 
-const title = "Form Builder Function Test"
+let title = "Form Builder Function Test"
 
-id = id for form
+let id = id for form
 
 let wrapperType = type of wrapper for form
 
