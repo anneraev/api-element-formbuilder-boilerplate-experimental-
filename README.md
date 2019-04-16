@@ -1,13 +1,13 @@
 An all in one API manager, element and form builder.
 
-The following must be passed to the form builder fall function:
+The following must be passed to the form builder call function:
 const title = "Form Builder Function Test"
-let id //id for form
-let wrapperType //type of wrapper for form
-let keysArray //array of keys associated with each input in the form.
-let valuesArray //array of values associated with each input in the form.
-let typesArray //array of types of inputs to create.
-let arrayOptionsArray //array of arrays containing options. 
+id = id for form
+let wrapperType = type of wrapper for form
+let keysArray = array of keys associated with each input in the form.
+let valuesArray = array of values associated with each input in the form.
+let typesArray = array of types of inputs to create.
+let arrayOptionsArray = array of arrays containing options. 
 
 One of each much be defined for EVERY input. If one of the above are not valid, enter "undefined" for that entry.
 
