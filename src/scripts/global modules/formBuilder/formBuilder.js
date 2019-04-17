@@ -1,8 +1,32 @@
-import htmlBuilder from "./htmlBuilder";
-import formObjectManager from "./formObject";
-
+import htmlBuilder from "../htmlBuilder"
+import formObjectManager from "./formObjectManager"
 //will be passed to the object that contains all the values of this form.
 let elementsArray = [];
+
+//This creates an array of the created elements, iterate through them, dynamically build key/value pairs that refer to the element, store the object. That way, any of the form's elements can be easily referred to. See the comments in formObjectManager.js for more information on how to call specific elements.
+
+//call function:
+// formBuilder.buildForm: function (wrapperType, title, keysArray, valuesArray, typesArray, id, arrayOptionsArray)
+
+// The following must be passed to the form builder call function:
+
+// wrappperType = type of wrapper that the form will be displayed in (div, fieldset, ect.)
+
+// let title = "Form Builder Function Test"
+
+// let id = id for form
+
+// let wrapperType = type of wrapper for form
+
+// let keysArray = array of keys associated with each input in the form.
+
+// let valuesArray = array of values associated with each input in the form.
+
+// let typesArray = array of types of inputs to create.
+
+// let arrayOptionsArray = array of arrays containing options. Ideally, these should come from an API database containing those options, and should arrive as an array in the order they appear in the databese. That array should be pushed to this array to create an array of arrays.
+
+// One of each much be defined for EVERY input. If one of the above are not valid, enter "undefined" for that entry.
 
 //ID style guide:
 //Whole Form ("form"--id)
@@ -15,17 +39,17 @@ let elementsArray = [];
 // type - type of input
 // key - name of item in data.
 
-//create an array of the created elements, iterate through them, dynamically build key/value pairs that refer to the element, store the object. That way, any of the form's elements can be easily referred to.
-
-//Things you'll want a reference to:
-//Inputs themselves (for getting values, adding options)
-//The form itself.
-//The wrapper for each input/label pair (for adding options, removing labels, fields, ect).
-//a reference to its submit button.
-
 //A reference to the object needs to be made inside the button's event listener. Makes it easy to access.
 
-//Object constructor needs to have in it functions to call the field creation functions, so that adding a new field to an existing form is as easy as calling that form and the field building function that is an attribute of it.
+//One can easily set up a form to be created by using formBuilder.(setWrapper(element type), set title(title string), addKey(key string), addValue(value string), addType(input type string), setId(id integer), addOptions(array of options)). Then, one call the form with formBuilder.createForm (no arguments needed). Store the returned form in a variable and access the form with nameOfFormVariable[0] and the object with nameOfFormVariable[1].
+
+let wrapperType
+let title
+let keysArray = []
+let valuesArray = []
+let typesArray = []
+let id
+let arrayOptionsArray = []
 
 export default {
     //Title of form, Array of original keys, array of original values, array of types of fields, id from dataset.
@@ -46,12 +70,12 @@ export default {
             const value = valuesArray[i];
             //label and form
             if (type === "radio" || type === "checkbox") {
-                const heading = this.buildHeader("h5", id, type, key)
+                const heading = this.buildHeader("h5", id, key)
                 form.appendChild(heading);
             };
             //specify type
             if (type === "textarea") {
-                let textArea = this.buildTextArea(type, key, id); //?
+                let textArea = this.buildTextArea(key, id); //?
                 form.appendChild(textArea);
             } else if (type === "select") {
                 const dropDown = this.buildDropdown(type, key, id, value, optionsArray);
@@ -82,9 +106,9 @@ export default {
         formArray.push(newFormObject);
         return formArray;
     },
-    buildHeader: function (number, id, type, key) {
+    buildHeader: function (number, id, key) {
         //number is the header type. (h1, h2, ect.)
-        const header = htmlBuilder.elementBuilder(`h${number}`, `label--${id}--${type}--${key}`, `${key}`);
+        const header = htmlBuilder.elementBuilder(`h${number}`, `label--${id}--h${number}--${key}`, `${key}`);
         elementsArray.push(header);
         return header;
     },
@@ -98,20 +122,21 @@ export default {
         elementsArray.push(legend);
         return legend;
     },
-    buildTextArea: function (type, key, id) {
-        const label = this.buildLabel(key, id, type)
-        const div = htmlBuilder.elementBuilder("div", `wrapper--${id}--${type}`)
-        const textArea = htmlBuilder.elementBuilder(`${type}`, `field--${id}--${type}--${key}`);
+    buildTextArea: function (key, id) {
+        const label = this.buildLabel(key, id, "textarea")
+        const div = htmlBuilder.elementBuilder("div", `wrapper--${id}--textarea`)
+        const textArea = htmlBuilder.elementBuilder("textarea", `field--${id}--textarea--${key}`);
         div.appendChild(label);
         div.appendChild(textArea);
         elementsArray.push(textArea);
         return div;
     },
-    buildDropdown: function (type, key, id, value, optionsArray) {
-        const label = this.buildLabel(key, id, type)
-        const div = htmlBuilder.elementBuilder("div", `wrapper--${id}--${type}`)
-        const dropdown = htmlBuilder.elementBuilder(`${type}`, `field--${id}--${type}--${key}`, undefined, `${value}`) //?
+    buildDropdown: function (key, id, value, optionsArray) {
+        const label = this.buildLabel(key, id, "select")
+        const div = htmlBuilder.elementBuilder("div", `wrapper--${id}--dropdown`)
+        const dropdown = htmlBuilder.elementBuilder("select", `field--${id}--"select"--${key}`, undefined, `${value}`) //?
         //build out options for the select input type. The value is alwas an integer representing the Id of the item in the dataset.
+        const type = "select"
         optionsArray.forEach(option => {
             const optionIndex = optionsArray.indexOf(option);
             const addedOption = this.buildOption(option, optionIndex, type, id, key);
@@ -125,22 +150,23 @@ export default {
     buildOption: function (option, optionIndex, type, id, key) {
         let optionValue
         let inputType
+        const optionNum = optionIndex + 1
         if (type === "select" || type === "dropdown" || type === "option") {
-            optionValue = optionIndex;
+            optionValue = optionNum;
             inputType = "option"
         } else {
             optionValue = option;
             inputType = "input";
         }
-        const newOption = htmlBuilder.elementBuilder(`${inputType}`, `field--${id}--${type}--${key}--${optionIndex}`, `${option}`, `${optionValue}`)
+        const newOption = htmlBuilder.elementBuilder(`${inputType}`, `field--${id}--${type}--${key}--${optionNum}`, `${option}`, `${optionValue}`)
         elementsArray.push(newOption);
         if (inputType !== "option") {
-            const label = htmlBuilder.elementBuilder("label", `label--${id}--${type}--${key}--${optionIndex}`, `${option}`);
+            const label = htmlBuilder.elementBuilder("label", `label--${id}--${type}--${key}--${optionNum}`, `${option}`);
             if (type === "radio") {
                 newOption.setAttribute("name", `${key}`);
             }
             newOption.setAttribute("type", `${type}`);
-            const optionDiv = htmlBuilder.elementBuilder("div", `divOption--${id}--${type}--${key}--${optionIndex}`)
+            const optionDiv = htmlBuilder.elementBuilder("div", `divOption--${id}--${type}--${key}--${optionNum}`)
             optionDiv.appendChild(label);
             optionDiv.appendChild(newOption);
             return optionDiv;
@@ -154,7 +180,10 @@ export default {
         const input = htmlBuilder.elementBuilder("input", `field--${id}--${type}--${key}`);
         input.setAttribute("type", `${type}`);
         if (type === "text") {
-            input.setAttribute("placeholder", `${value}`);
+            input.setAttribute("placeholder", `add ${key}`);
+            if (value){
+                input.value = value;
+            }
         }
         div.appendChild(label);
         div.appendChild(input);
@@ -165,5 +194,39 @@ export default {
         const button = htmlBuilder.elementBuilder("button", `button--${id}--${name}`, name);
         elementsArray.push(button);
         return button;
+    },
+    clearVariables: function () {
+        wrapperType = ""
+        title = ""
+        keysArray = []
+        valuesArray = []
+        typesArray = []
+        id = ""
+        arrayOptionsArray = []
+    },
+    setWrapper: function (string) {
+        wrapperType = string;
+    },
+    setTitle: function (string) {
+        title = string;
+    },
+    addKey: function (string) {
+        keysArray.push(string);
+    },
+    addValue: function (string) {
+        valuesArray.push(string)
+    },
+    addType: function (string) {
+        typesArray.push(string);
+    },
+    setId: function (num) {
+        id = num;
+    },
+    addOptions: function (array) {
+        arrayOptionsArray.push(array);
+    },
+    createForm: function() {
+        const formArray = this.buildForm(wrapperType, title, keysArray, valuesArray, typesArray, id, arrayOptionsArray);
+        return formArray;
     }
 }
